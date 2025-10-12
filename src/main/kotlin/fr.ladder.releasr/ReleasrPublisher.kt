@@ -10,23 +10,25 @@ class ReleasrPublisher(
     private val githubPassword: String?,
     private val githubRepository: String?,
     private val nexusUser: String?,
-    private val nexusPassword: String?
+    private val nexusPassword: String?,
+    private val refType: String
 ) {
 
     constructor(target: Project) : this(
         target = target,
-        System.getenv("githubUser"),
-        System.getenv("githubPassword"),
-        System.getenv("githubRepository"),
-        target.findProperty("NEXUS_USER") as String? ?: System.getenv("nexusUser"),
-        target.findProperty("NEXUS_PASSWORD") as String? ?: System.getenv("nexusPassword")
+        githubUser = System.getenv("githubUser"),
+        githubPassword = System.getenv("githubPassword"),
+        githubRepository = System.getenv("githubRepository"),
+        nexusUser = target.findProperty("NEXUS_USER") as String? ?: System.getenv("nexusUser"),
+        nexusPassword = target.findProperty("NEXUS_PASSWORD") as String? ?: System.getenv("nexusPassword"),
+        refType = System.getenv("refType") ?: ""
     ) {
 
     }
 
     fun registerGitHubRepository() {
         target.extensions.configure(PublishingExtension::class.java) { pub ->
-            if(System.getenv("refType") == null)
+            if(refType != "tag")
                 return@configure;
 
             // register GitHub repository
@@ -67,18 +69,15 @@ class ReleasrPublisher(
 
     fun createPublication() {
         target.extensions.configure(PublishingExtension::class.java) { pub ->
-            val refType = System.getenv("refType") ?: ""
             when (refType) {
                 "branch" -> {
                     // create commit package on push to branch main
-                    if(target.version.toString().startsWith("v")) {
-                        pub.publications.create("maven", MavenPublication::class.java) { publication ->
-                            publication.groupId = target.group.toString()
-                            publication.artifactId = target.name
-                            publication.version = target.version.toString()
+                    pub.publications.create("maven", MavenPublication::class.java) { publication ->
+                        publication.groupId = target.group.toString()
+                        publication.artifactId = target.name
+                        publication.version = target.version.toString()
 
-                            publication.from(target.components.getByName("java"))
-                        }
+                        publication.from(target.components.getByName("java"))
                     }
                 }
                 "tag" -> {

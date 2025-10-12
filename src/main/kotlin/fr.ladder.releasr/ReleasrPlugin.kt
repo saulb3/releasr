@@ -2,8 +2,6 @@ package fr.ladder.releasr
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.api.tasks.compile.JavaCompile
 
 class ReleasrPlugin : Plugin<Project> {
@@ -26,7 +24,7 @@ class ReleasrPlugin : Plugin<Project> {
         target.pluginManager.apply("maven-publish")
 
         // define project version
-        target.version = getVersion() ?: "local"
+        target.version = getVersion()
 
         // set default compile parameters
         target.tasks.named("compileJava", JavaCompile::class.java) { task ->
@@ -47,13 +45,11 @@ class ReleasrPlugin : Plugin<Project> {
     /**
      * Constructs a version string in the format "vX.Y.Z" based on the latest tag and an incremented patch number.
      */
-    fun getVersion(): String? {
-        val numbers: List<String>? = latestTag?.split('.')
-        val builder = StringBuilder("v");
-        if(numbers == null) {
-            return null;
-        }
-
+    fun getVersion(): String {
+        val numbers: List<String> = latestTag
+            ?.replace("v", "")
+            ?.split('.') ?: return "local"
+        val builder = StringBuilder("");
 
         for (i in 0 until numbers.size) {
             if(i < numbers.size - 1) {
