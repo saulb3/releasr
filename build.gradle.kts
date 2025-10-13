@@ -8,6 +8,8 @@ plugins {
 group = "fr.ladder"
 version = getVersion()
 
+println("- version: $version")
+
 repositories {
     mavenCentral()
     mavenLocal()
