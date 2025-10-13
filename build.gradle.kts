@@ -13,15 +13,15 @@ repositories {
     mavenLocal()
 }
 
-gradlePlugin {
-    plugins {
-        create("releasr") {
-            id = "fr.ladder.releasr"
-            implementationClass = "fr.ladder.releasr.ReleasrPlugin"
-            version = version
-        }
-    }
-}
+//gradlePlugin {
+//    plugins {
+//        create("releasr") {
+//            id = "fr.ladder.releasr"
+//            implementationClass = "fr.ladder.releasr.ReleasrPlugin"
+//            version = version
+//        }
+//    }
+//}
 
 publishing {
     val refType = System.getenv("refType") ?: ""
@@ -31,9 +31,10 @@ publishing {
         val githubPassword = System.getenv("githubPassword")
         val githubRepository = System.getenv("githubRepository")
 
+        println("Trying to add GitHub repository: $githubRepository")
         if(refType == "tag") {
             if(githubUser != null) {
-                println("- register 'GitHubPackages' repository.")
+                println("- repository added.")
                 maven {
                     name = "GitHubPackages"
                     url = uri("https://maven.pkg.github.com/$githubRepository")
@@ -43,16 +44,19 @@ publishing {
                     }
                 }
             } else {
-                println("- 'githubUser' is null.")
+                println("- repository not added (githubUser is null).")
             }
+        } else {
+            println("- repository not added (refType is not a branch).")
         }
 
         val nexusUser: String? = findProperty("NEXUS_USER") as String? ?: System.getenv("nexusUser")
         val nexusPassword: String? = findProperty("NEXUS_PASSWORD") as String? ?: System.getenv("nexusPassword")
 
+        println("Trying to add Private repository.")
         if(refType.isNotEmpty()) {
             if (nexusUser != null) {
-                println("- register 'MavenReleases' repository.")
+                println("- repository added.")
                 maven {
                     name = "MavenReleases"
                     url = uri("https://repo.lylaw.fr/repository/maven-releases/")
@@ -62,7 +66,7 @@ publishing {
                     }
                 }
             } else {
-                println("- 'nexusUser' is null.")
+                println("- repository not added (nexusUser is null).")
             }
         }
     }
@@ -71,6 +75,7 @@ publishing {
         when (refType) {
             "branch" -> {
                 // create commit package on push to branch main
+                println("Create commit package, version: $version")
                 create<MavenPublication>("maven") {
                     groupId = project.group.toString()
                     artifactId = project.name
@@ -85,6 +90,7 @@ publishing {
                     .replace("v", "")
                     .replace("/", "-")
                 // create a publication with the classifier
+                println("Create tag package, version: $refName")
                 create<MavenPublication>("maven") {
                     groupId = project.group.toString()
                     artifactId = project.name
