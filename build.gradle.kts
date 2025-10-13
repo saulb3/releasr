@@ -28,19 +28,38 @@ repositories {
     mavenLocal()
 }
 
-//gradlePlugin {
-//    plugins {
-//        create("releasr") {
-//            id = "fr.ladder.releasr"
-//            implementationClass = "fr.ladder.releasr.ReleasrPlugin"
-//            version = version
-//        }
-//    }
-//}
+val refType = System.getenv("refType") ?: ""
+
+gradlePlugin {
+    plugins {
+        when (refType) {
+            "branch" -> {
+                // create commit package on push to branch main
+                create("releasr") {
+                    id = "fr.ladder.releasr"
+                    implementationClass = "fr.ladder.releasr.ReleasrPlugin"
+                    version = version
+                }
+            }
+
+            "tag" -> {
+                val refName: String = (System.getenv("refName") ?: "")
+                    .replace("v", "")
+                    .replace("/", "-")
+                // create a publication with the classifier
+                create("releasr") {
+                    id = "fr.ladder.releasr"
+                    implementationClass = "fr.ladder.releasr.ReleasrPlugin"
+                    version = refName
+                }
+            }
+
+            else -> println("No plugin created because refType is not branch or tag")
+        }
+    }
+}
 
 publishing {
-    val refType = System.getenv("refType") ?: ""
-
     repositories {
         val githubUser = System.getenv("githubUser")
         val githubPassword = System.getenv("githubPassword")
@@ -73,37 +92,6 @@ publishing {
                     }
                 }
             }
-        }
-    }
-
-    publications {
-        when (refType) {
-            "branch" -> {
-                // create commit package on push to branch main
-                create<MavenPublication>("maven") {
-                    groupId = project.group.toString()
-                    artifactId = project.name
-                    version = version.toString()
-
-                    from(components["java"])
-                }
-            }
-
-            "tag" -> {
-                val refName: String = (System.getenv("refName") ?: "")
-                    .replace("v", "")
-                    .replace("/", "-")
-                // create a publication with the classifier
-                create<MavenPublication>("maven") {
-                    groupId = project.group.toString()
-                    artifactId = project.name
-                    version = refName
-
-                    from(components["java"])
-                }
-            }
-
-            else -> println("No publication created because refType is not branch or tag")
         }
     }
 }
