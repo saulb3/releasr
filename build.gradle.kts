@@ -1,8 +1,6 @@
 plugins {
     kotlin("jvm") version "2.2.20"
     `java-gradle-plugin`
-    `maven-publish`
-
 }
 
 /**
@@ -28,17 +26,7 @@ repositories {
     mavenLocal()
 }
 
-//gradlePlugin {
-//    plugins {
-//        create("releasr") {
-//            id = "fr.ladder.releasr"
-//            implementationClass = "fr.ladder.releasr.ReleasrPlugin"
-//            version = version
-//        }
-//    }
-//}
-
-publishing {
+gradlePlugin {
     val refType = System.getenv("refType") ?: ""
 
     repositories {
@@ -76,16 +64,14 @@ publishing {
         }
     }
 
-    publications {
+    plugins {
         when (refType) {
             "branch" -> {
                 // create commit package on push to branch main
-                create<MavenPublication>("maven") {
-                    groupId = project.group.toString()
-                    artifactId = project.name
-                    version = version.toString()
-
-                    from(components["java"])
+                create("releasr") {
+                    id = "fr.ladder.releasr"
+                    version = version
+                    implementationClass = "fr.ladder.releasr.ReleasrPlugin"
                 }
             }
 
@@ -94,12 +80,10 @@ publishing {
                     .replace("v", "")
                     .replace("/", "-")
                 // create a publication with the classifier
-                create<MavenPublication>("maven") {
-                    groupId = project.group.toString()
-                    artifactId = project.name
+                create("releasr") {
+                    id = "fr.ladder.releasr"
                     version = refName
-
-                    from(components["java"])
+                    implementationClass = "fr.ladder.releasr.ReleasrPlugin"
                 }
             }
 
