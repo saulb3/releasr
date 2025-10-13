@@ -47,7 +47,6 @@ class ReleasrPlugin : Plugin<Project> {
      */
     fun getVersion(): String {
         val numbers: List<String> = latestTag
-            ?.replace("v", "")
             ?.split('.') ?: return "local"
         val builder = StringBuilder("");
 

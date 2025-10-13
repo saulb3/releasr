@@ -5,6 +5,19 @@ plugins {
 
 }
 
+/**
+ * Get the latest tag from the environment variable set in the CI/CD pipeline.
+ * The tag is expected to be in the format "vX.Y.Z".
+ * The commit hash is also retrieved from the environment variable and truncated to 7 characters.
+ */
+val latestTag: String? = System.getenv("latestTag")?.replace("v", "")
+
+/**
+ * Get the commit hash from the environment variable set in the CI/CD pipeline.
+ * The commit hash is truncated to 7 characters.
+ */
+val commitHash: String? = System.getenv("commitHash")?.take(7);
+
 group = "fr.ladder"
 version = getVersion()
 
@@ -33,10 +46,8 @@ publishing {
         val githubPassword = System.getenv("githubPassword")
         val githubRepository = System.getenv("githubRepository")
 
-        println("Trying to add GitHub repository: $githubRepository")
         if(refType == "tag") {
             if(githubUser != null) {
-                println("- repository added.")
                 maven {
                     name = "GitHubPackages"
                     url = uri("https://maven.pkg.github.com/$githubRepository")
@@ -45,20 +56,14 @@ publishing {
                         password = githubPassword
                     }
                 }
-            } else {
-                println("- repository not added (githubUser is null).")
             }
-        } else {
-            println("- repository not added (refType is not a tag).")
         }
 
         val nexusUser: String? = findProperty("NEXUS_USER") as String? ?: System.getenv("nexusUser")
         val nexusPassword: String? = findProperty("NEXUS_PASSWORD") as String? ?: System.getenv("nexusPassword")
 
-        println("Trying to add Private repository.")
         if(refType.isNotEmpty()) {
             if (nexusUser != null) {
-                println("- repository added.")
                 maven {
                     name = "MavenReleases"
                     url = uri("https://repo.lylaw.fr/repository/maven-releases/")
@@ -67,8 +72,6 @@ publishing {
                         password = nexusPassword
                     }
                 }
-            } else {
-                println("- repository not added (nexusUser is null).")
             }
         }
     }
@@ -77,7 +80,6 @@ publishing {
         when (refType) {
             "branch" -> {
                 // create commit package on push to branch main
-                println("Create commit package, version: $version")
                 create<MavenPublication>("maven") {
                     groupId = project.group.toString()
                     artifactId = project.name
@@ -92,7 +94,6 @@ publishing {
                     .replace("v", "")
                     .replace("/", "-")
                 // create a publication with the classifier
-                println("Create tag package, version: $refName")
                 create<MavenPublication>("maven") {
                     groupId = project.group.toString()
                     artifactId = project.name
@@ -108,24 +109,10 @@ publishing {
 }
 
 /**
- * Get the latest tag from the environment variable set in the CI/CD pipeline.
- * The tag is expected to be in the format "vX.Y.Z".
- * The commit hash is also retrieved from the environment variable and truncated to 7 characters.
- */
-val latestTag: String? = System.getenv("latestTag")?.replace("v", "")
-
-/**
- * Get the commit hash from the environment variable set in the CI/CD pipeline.
- * The commit hash is truncated to 7 characters.
- */
-val commitHash: String? = System.getenv("commitHash")?.take(7);
-
-/**
  * Constructs a version string in the format "vX.Y.Z" based on the latest tag and an incremented patch number.
  */
 fun getVersion(): String {
     val numbers: List<String> = latestTag
-        ?.replace("v", "")
         ?.split('.') ?: return "local"
     val builder = StringBuilder();
 
