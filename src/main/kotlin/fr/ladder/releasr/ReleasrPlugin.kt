@@ -7,28 +7,19 @@ import org.gradle.api.tasks.compile.JavaCompile
 class ReleasrPlugin : Plugin<Project> {
 
     /**
-     * Get the latest tag from the environment variable set in the CI/CD pipeline.
-     * The tag is expected to be in the format "vX.Y.Z".
-     * The commit hash is also retrieved from the environment variable and truncated to 7 characters.
-     */
-    val latestTag: String? = System.getenv("latestTag")?.replace("v", "")
-
-    /**
      * Get the commit hash from the environment variable set in the CI/CD pipeline.
      * The commit hash is truncated to 7 characters.
      */
     val commitHash: String? = System.getenv("commitHash")?.take(7);
 
     override fun apply(target: Project) {
-        // apply maven publish
-        target.pluginManager.apply("maven-publish")
+        target.plugins.withId("java") {
+            // configure default compile parameters
+            configureCompileJava(target);
+        }
 
-        // define project version
-        target.version = getVersion()
+        target.plugins.withId("maven-publish") {
 
-        // set default compile parameters
-        target.tasks.named("compileJava", JavaCompile::class.java) { task ->
-            task.options.encoding = "UTF-8"
         }
 
         val publisher: ReleasrPublisher = ReleasrPublisher(target);
@@ -42,6 +33,12 @@ class ReleasrPlugin : Plugin<Project> {
         }
     }
 
+    fun configureCompileJava(target: Project) {
+        target.tasks.named("compileJava", JavaCompile::class.java) {
+            options.encoding = "UTF-8"
+        }
+    }
+
     /**
      * Constructs a version string in the format "vX.Y.Z" based on the latest tag and an incremented patch number.
      */
@@ -51,7 +48,7 @@ class ReleasrPlugin : Plugin<Project> {
         val builder = StringBuilder("");
 
         for (i in 0 until numbers.size) {
-            if(i < numbers.size - 1) {
+            if (i < numbers.size - 1) {
                 builder
                     .append(numbers[i])
                     .append(".")
@@ -69,6 +66,5 @@ class ReleasrPlugin : Plugin<Project> {
         }
         return builder.toString()
     }
-
 
 }
