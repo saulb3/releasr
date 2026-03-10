@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
  */
 object ReleasrContext {
 
-    private val refType: String = System.getenv("refType") ?: "branch";
+    private val refType: String = System.getenv("refType") ?: "branch"
 
     /**
      * Get the latest version of the project.
@@ -30,9 +30,10 @@ object ReleasrContext {
                     .lastOrNull()
 
                 return tag?.replace("v", "")
-            } catch (_: Exception) { }
+            } catch (_: Exception) {
+            }
 
-            return null;
+            return null
         }
 
     /**
@@ -52,7 +53,7 @@ object ReleasrContext {
             return "$major.$minor.$patch"
         }
 
-    internal val versionType: VersionType = if(refType == "tag") VersionType.RELEASE else VersionType.PRERELEASE;
+    internal val versionType: VersionType = if (refType == "tag") VersionType.RELEASE else VersionType.PRERELEASE
 }
 
 private fun compareSemVer(v1: String, v2: String): Int {

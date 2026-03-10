@@ -24,8 +24,6 @@ gradlePlugin {
     plugins {
         when (System.getenv("refType") ?: "branch") {
             "branch" -> {
-                val timestamp: String = System.currentTimeMillis().toString(16)
-                val context = System.getenv("commitHash")?.take(7) ?: "local"
                 // create commit package on push to branch main
                 create("releasr", Action {
                     id = "fr.ladder.releasr"
@@ -56,7 +54,7 @@ publishing {
         val githubPassword = System.getenv("githubPassword")
         val githubRepository = System.getenv("githubRepository")
 
-        if(githubUser != null) {
+        if (githubUser != null) {
             maven {
                 name = "GitHubPackages"
                 url = uri("https://maven.pkg.github.com/$githubRepository")
@@ -103,9 +101,10 @@ val latestVersion: String?
                 .lastOrNull()
 
             return tag?.replace("v", "")
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
 
-        return null;
+        return null
     }
 
 val nextVersion: String

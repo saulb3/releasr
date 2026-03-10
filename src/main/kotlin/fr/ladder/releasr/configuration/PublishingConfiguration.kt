@@ -15,11 +15,11 @@ fun configureRepositories(publishing: PublishingExtension, releasr: ReleasrExten
 }
 
 private fun configureGitHubRepository(publishing: PublishingExtension) {
-    if(ReleasrContext.versionType != VersionType.RELEASE)
+    if (ReleasrContext.versionType != VersionType.RELEASE)
         return
 
     val githubRepository = System.getenv("githubRepository")
-    if(githubRepository != null) {
+    if (githubRepository != null) {
         publishing.repositories.maven {
             name = "GitHubPackages"
             url = URI("https://maven.pkg.github.com/$githubRepository")
@@ -32,8 +32,8 @@ private fun configureGitHubRepository(publishing: PublishingExtension) {
 }
 
 private fun configureReleasrRepository(publishing: PublishingExtension, releasr: ReleasrExtension) {
-    if(releasr.url.orNull == null)
-        return;
+    if (releasr.url.orNull == null)
+        return
 
     publishing.repositories.maven {
         name = "ReleasrPackages"
@@ -46,7 +46,7 @@ private fun configureReleasrRepository(publishing: PublishingExtension, releasr:
 }
 
 fun configurePublications(publishing: PublishingExtension, target: Project) {
-    when(ReleasrContext.versionType) {
+    when (ReleasrContext.versionType) {
         // create pre-release version
 
         VersionType.PRERELEASE -> {
