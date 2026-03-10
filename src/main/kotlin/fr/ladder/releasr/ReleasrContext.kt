@@ -53,7 +53,18 @@ object ReleasrContext {
             return "$major.$minor.$patch"
         }
 
-    internal val versionType: VersionType = if (refType == "tag") VersionType.RELEASE else VersionType.PRERELEASE
+    val versionType: VersionType = if (refType == "tag") VersionType.RELEASE else VersionType.PRERELEASE
+
+    val version: String
+        get() {
+            val timestamp: String = System.currentTimeMillis().toString(16)
+            val context = System.getenv("commitHash")?.take(7) ?: "local"
+
+            return System.getenv("refName")
+                ?.replace("v", "")
+                ?.replace("/", "-")
+                ?: "${nextVersion}-${timestamp}-${context}"
+        }
 }
 
 private fun compareSemVer(v1: String, v2: String): Int {

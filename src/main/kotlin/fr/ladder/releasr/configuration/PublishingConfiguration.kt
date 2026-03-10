@@ -49,17 +49,12 @@ fun configurePublications(publishing: PublishingExtension, target: Project) {
     when (ReleasrContext.versionType) {
         // create pre-release version
 
-        VersionType.PRERELEASE -> {
-            val timestamp: String = System.currentTimeMillis().toString(16)
-            val context = System.getenv("commitHash")?.take(7) ?: "local"
-
-            publishing.publications.create<MavenPublication>("maven") {
+        VersionType.PRERELEASE -> publishing.publications.create<MavenPublication>("maven") {
                 artifactId = target.name
                 groupId = target.group.toString()
-                version = "${ReleasrContext.nextVersion}-${timestamp}-${context}"
+                version = ReleasrContext.version
 
                 from(target.components.findByName("java"))
-            }
         }
         // create release version
         VersionType.RELEASE -> publishing.publications.create<MavenPublication>("maven") {
