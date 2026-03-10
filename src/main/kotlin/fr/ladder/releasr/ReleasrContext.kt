@@ -59,14 +59,15 @@ object ReleasrContext {
     val version: String
         get() {
             val timestamp: String = Instant.now().epochSecond.toString(16)
-            val context = System.getenv("commitHash")?.take(7) ?: "local"
+            val branch: String = System.getenv("refName")
+                ?.replace("v", "")
+                ?.replace("/", "-")
+                ?: "local"
 
+            val commit: String = System.getenv("commitHash")?.take(7) ?: ""
             return when(versionType) {
-                VersionType.RELEASE -> System.getenv("refName")
-                    ?.replace("v", "")
-                    ?.replace("/", "-")
-                    ?: error("'refName' not found")
-                VersionType.PRERELEASE -> "${nextVersion}-${timestamp}-${context}"
+                VersionType.RELEASE -> branch
+                VersionType.PRERELEASE -> "${nextVersion}-${timestamp}-${branch}-${commit}".trim('-')
             }
         }
 }

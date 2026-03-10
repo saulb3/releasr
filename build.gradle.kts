@@ -9,15 +9,16 @@ plugins {
 group = "fr.ladder"
 
 val timestamp: String = Instant.now().epochSecond.toString(16)
-val context = System.getenv("commitHash")?.take(7) ?: "local"
+val branch: String = System.getenv("refName")
+    ?.replace("v", "")
+    ?.replace("/", "-")
+    ?: "local"
+
+val commit: String = System.getenv("commitHash")?.take(7) ?: ""
 
 version = when(System.getenv("refType") ?: "branch") {
-    "tag" -> System.getenv("refName")
-        ?.replace("v", "")
-        ?.replace("/", "-")
-        ?: error("'refName' not found")
-
-    "branch" -> "${nextVersion}-${timestamp}-${context}"
+    "tag" -> branch
+    "branch" -> "${nextVersion}-${timestamp}-${branch}-${commit}".trim('-')
     else -> error("unrecognized 'refType'")
 }
 
