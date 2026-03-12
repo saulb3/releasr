@@ -2,6 +2,7 @@ package fr.ladder.releasr.configuration
 
 import fr.ladder.releasr.ReleasrContext
 import fr.ladder.releasr.VersionType
+import fr.ladder.releasr.extension.GitHubPublicationMode
 import fr.ladder.releasr.extension.ReleasrExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
@@ -10,12 +11,16 @@ import org.gradle.kotlin.dsl.create
 import java.net.URI
 
 fun configureRepositories(publishing: PublishingExtension, releasr: ReleasrExtension) {
-    configureGitHubRepository(publishing)
+    configureGitHubRepository(publishing, releasr)
     configureReleasrRepository(publishing, releasr)
 }
 
-private fun configureGitHubRepository(publishing: PublishingExtension) {
-    if (ReleasrContext.versionType != VersionType.RELEASE)
+private fun configureGitHubRepository(publishing: PublishingExtension, releasr: ReleasrExtension) {
+    val mode = releasr.gitHubPublicationMode.getOrElse(GitHubPublicationMode.NEVER)
+    if(mode == GitHubPublicationMode.NEVER)
+        return
+
+    if(mode == GitHubPublicationMode.ONLY_RELEASE && ReleasrContext.versionType != VersionType.RELEASE)
         return
 
     val githubRepository = System.getenv("githubRepository")

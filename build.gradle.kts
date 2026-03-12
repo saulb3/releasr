@@ -57,21 +57,6 @@ gradlePlugin {
 
 publishing {
     repositories {
-        val githubUser = System.getenv("githubUser")
-        val githubPassword = System.getenv("githubPassword")
-        val githubRepository = System.getenv("githubRepository")
-
-        if (githubUser != null) {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/$githubRepository")
-                credentials {
-                    username = githubUser
-                    password = githubPassword
-                }
-            }
-        }
-
         val nexusUser: String? = findProperty("REPO_USER") as String? ?: System.getenv("repoUser")
         val nexusPassword: String? = findProperty("REPO_PASSWORD") as String? ?: System.getenv("repoPassword")
 
